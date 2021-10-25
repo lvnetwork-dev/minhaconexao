@@ -1,0 +1,105 @@
+#!/bin/bash
+ 
+MACHINE_TYPE=`uname -m`
+ARCHITETURE_FOLDER=''
+if [ ${MACHINE_TYPE} == 'x86_64' ]; then
+  ARCHITETURE_FOLDER='x64'
+else
+  ARCHITETURE_FOLDER='x32'
+fi
+DIRECTORY=/etc/mc-test
+function checkRootUser() {
+	if [ "$(id -u)" != "0" ]; then
+	   echo "Este script deve ser executado como root, mas a aplicação não terá poderes de root." 1>&2
+	   exit 1
+	fi
+}
+function verifySystemd() {
+	echo "Verificando systemd"
+	if [ -e "/lib/systemd/systemd" ] ; then
+		echo 'systemd OK'
+	else	
+		echo "Erro 1: O servidor de testes precisa do systemd para funcionar, por favor instale-o"
+		exit
+	fi
+}
+function userPreparation() {
+	echo 'Verificando Grupo e Usuário'
+	GROUP_EXISTS=$(cat /etc/group |grep mc-test |wc -l)
+	if [ ${GROUP_EXISTS} -eq 1 ]; then
+	   echo 'Grupo já existe'
+	else
+	   echo "Criando grupo mc-test"
+	   addgroup mc-test
+	fi
+	USER_EXISTS=$(cat /etc/passwd |grep mc-test |wc -l)
+	if [ ${USER_EXISTS} -eq 1 ]; then
+	   echo 'Usuário já existe'
+	else
+	   echo "Criando usuário mc-test"
+	   useradd -d ${DIRECTORY} -m -g mc-test -s /usr/sbin/nologin mc-test
+	fi	
+}
+function deleteOldFiles() {
+	echo "Deletando arquivos antigos"
+	rm -f ${DIRECTORY}/keys/* &>/dev/null
+	rm -f ${DIRECTORY}/mc-test &>/dev/null
+	rm -f ${DIRECTORY}/updater &>/dev/null
+}
+function downloadFiles() {
+	echo "Aguarde, baixando arquivos..."
+	mkdir ${DIRECTORY}/keys
+	wget https://minhaconexao.s3-sa-east-1.amazonaws.com/rustServer/certification/star.mcservers.co.key -q -P ${DIRECTORY}/keys
+	wget https://minhaconexao.s3-sa-east-1.amazonaws.com/rustServer/certification/star.mcservers.co.crt -q -P ${DIRECTORY}/keys
+	wget https://minhaconexao.s3-sa-east-1.amazonaws.com/rustServer/certification/star.mcservers.co.ca-bundle -q -P ${DIRECTORY}/keys
+	wget https://minhaconexao.s3-sa-east-1.amazonaws.com/rustServer/$ARCHITETURE_FOLDER/mc-test -q -P ${DIRECTORY}
+    wget https://minhaconexao.s3-sa-east-1.amazonaws.com/rustServer/Installer/updater -q -P ${DIRECTORY}
+}
+function settingsFiles() {
+		chmod +x ${DIRECTORY}/mc-test
+        chmod +x ${DIRECTORY}/updater
+		ln -s ${DIRECTORY}/mc-test /usr/bin/mc-test
+		chown mc-test. ${DIRECTORY} -R
+}
+function settingsSystemd() {
+	echo "Configurando systemd"
+	cat <<EOF > /etc/systemd/system/mc-test.service
+	[Unit]
+	Description=Minha Conexão Test Server Service
+	After=network.target
+	StartLimitIntervalSec=0
+	[Service]
+	Type=simple
+	User=mc-test
+	Group=mc-test
+	Restart=always
+	RestartSec=1
+	ExecStart=/usr/bin/mc-test --cert-path /etc/mc-test/keys/star.mcservers.co.crt --key-path /etc/mc-test/keys/star.mcservers.co.key
+	[Install]
+	WantedBy=default.target
+EOF
+}
+function startServer() {
+	systemctl daemon-reload
+	systemctl restart mc-test.service
+	systemctl enable mc-test.service
+}
+function installByOS() {
+	os_name=$(cat /etc/os-release | awk -F '=' '/^NAME/{print $2}' | awk '{print $1}' | tr -d '"')
+	if [ "$os_name" == "CentOS" ] || [ "$os_name" == "Fedora" ] || [ "$os_name" == "Red" ]
+	then
+		echo "Esse script foi feito para Debian :)"
+	else
+		userPreparation
+		checkRootUser
+		verifySystemd
+		deleteOldFiles
+		downloadFiles
+		settingsFiles
+		settingsSystemd
+		startServer
+	fi
+}
+echo "Aguarde, instalando o Servidor de Testes Minha Conexão $ARCHITETURE_FOLDER"
+installByOS
+echo "Instalacao concluida com sucesso!"
