@@ -23,7 +23,7 @@ Execute os comandos no console do seu servidor:
 >    $ wget -P /bin/ https://raw.githubusercontent.com/lvnetwork-dev/minhaconexao/main/install
 
 * Transforme o arquivo em um executável
->    $ chmod +x /bin/mc-test-install
+>    $ chmod +x /bin/install
 
 * Instalação do Minha Conexão
 >    $ mc-test-install
