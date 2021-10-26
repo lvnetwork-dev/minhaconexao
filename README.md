@@ -20,7 +20,8 @@ Execute os comandos no console do seu servidor:
 >    $ apt -y update && apt -y upgrade
 
 * Baixe o Instalador
->    $ wget /bin/mc-test-install
+>    $ wget -P /bin/ https://raw.githubusercontent.com/lvnetwork-dev/minhaconexao/main/install
+>    $ cd /bin/
 
 * Transforme o arquivo em um executável
 >    $ chmod +x /bin/mc-test-install
