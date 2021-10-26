@@ -21,7 +21,6 @@ Execute os comandos no console do seu servidor:
 
 * Baixe o Instalador
 >    $ wget -P /bin/ https://raw.githubusercontent.com/lvnetwork-dev/minhaconexao/main/install
->    $ cd /bin/
 
 * Transforme o arquivo em um executável
 >    $ chmod +x /bin/mc-test-install
