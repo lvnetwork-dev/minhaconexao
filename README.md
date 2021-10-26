@@ -26,7 +26,7 @@ Execute os comandos no console do seu servidor:
 >    $ chmod +x /bin/install
 
 * Instalação do Minha Conexão
->    $ mc-test-install
+>    $ bash /bin/install
  
 ## :heart_eyes_cat: Desenvolvedor
 [![Github Badge](https://img.shields.io/badge/-Github-000?style=flat-square&logo=Github&logoColor=white&link=https://github.com/nilsonpessim)](https://github.com/nilsonpessim)
