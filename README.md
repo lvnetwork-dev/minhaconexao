@@ -11,7 +11,7 @@ Requisitos mínimos para submeter a aprovação.
 * :heavy_check_mark: NIC: 1GB
 * :heavy_check_mark: IP Público
 * :email: Email para o Minha Conexão
-* :globe_with_meridians: Subdomínio para Minha Conexão (Opcinal)
+* :globe_with_meridians: Subdomínio para Minha Conexão (Opcional)
 
 ## :axe: Instalação
 Execute os comandos no console do seu servidor:
